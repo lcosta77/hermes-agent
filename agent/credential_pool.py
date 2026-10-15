@@ -2742,6 +2742,10 @@ def _seed_copilot_singleton(seed: _Seeder) -> None:
 
 
 def _seed_qwen_singleton(seed: _Seeder) -> None:
+    from hermes_constants import gdj_agent
+
+    if gdj_agent():  # GDJ fork: ~/.qwen belongs to the Qwen CLI, not to GDJ
+        return
     # Qwen OAuth tokens live in ~/.qwen/oauth_creds.json (written by the Qwen
     # CLI). refresh_if_expiring=False avoids network calls during pool loading.
     try:

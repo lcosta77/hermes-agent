@@ -127,6 +127,10 @@ def _try_gh_cli_token() -> Optional[str]:
 
 def _probe_gh_cli_token() -> Optional[str]:
     """Uncached ``gh auth token`` subprocess probe (see ``_try_gh_cli_token``)."""
+    from hermes_constants import gdj_agent
+
+    if gdj_agent():  # GDJ fork: never borrow the user's gh login
+        return None
     hostname = os.getenv("COPILOT_GH_HOST", "").strip()
     # gh must not short-circuit on GITHUB_TOKEN / GH_TOKEN, nor prompt from a backend process.
     clean_env = {k: v for k, v in os.environ.items() if k not in {"GITHUB_TOKEN", "GH_TOKEN"}}

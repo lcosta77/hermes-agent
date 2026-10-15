@@ -37,6 +37,10 @@ def adopt_external_logins_enabled() -> bool:
     out. When the user opts out, Hermes never reads or refreshes those files and says so once per
     process (INFO) the first time it would have."""
     global _notice_logged
+    from hermes_constants import gdj_agent
+
+    if gdj_agent():  # GDJ fork: fail closed, never adopt another CLI's login
+        return False
     try:
         from hermes_cli.config import load_config_readonly
         auth_cfg = (load_config_readonly() or {}).get("auth")

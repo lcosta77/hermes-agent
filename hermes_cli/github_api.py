@@ -40,6 +40,10 @@ def github_token_from_env(env=os.environ) -> Optional[str]:
 
 
 def _gh_cli_token() -> Optional[str]:
+    from hermes_constants import gdj_agent
+
+    if gdj_agent():  # GDJ fork: never borrow the user's gh login
+        return None
     global _gh_cli_cache, _gh_cli_probed
     if _gh_cli_probed:
         return _gh_cli_cache

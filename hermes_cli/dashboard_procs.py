@@ -191,7 +191,7 @@ def _hermes_home_for_pid(pid: int) -> str | None:
     if sys.platform == "win32":
         local_appdata = env.get("LOCALAPPDATA", "").strip()
         base = Path(local_appdata) if local_appdata else Path(env.get("USERPROFILE") or Path.home()) / "AppData" / "Local"
-        default_home = base / "hermes"
+        default_home = base / "GDJ" / "hermes"  # GDJ fork: see hermes_constants
     else:
         default_home = Path(env.get("HOME") or _pid_passwd_home(pid) or Path.home()) / ".hermes"
     root = profile_root_for_env_home(env_home, default_home)

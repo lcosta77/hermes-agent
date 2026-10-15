@@ -49,13 +49,21 @@ def _expand_hermes_home(path: str) -> Path:
 
 
 def _get_platform_default_hermes_home() -> Path:
-    """Return the platform default with the literal data-directory suffix."""
+    """Return the platform default with the literal data-directory suffix.
+
+    GDJ fork: the default lives under GDJ Hub's own data dir, never the
+    standalone Hermes install (``%LOCALAPPDATA%\\hermes`` / ``~/.hermes``), so a
+    process that misses HERMES_HOME still cannot touch a personal Hermes.
+    GDJ Hub always passes HERMES_HOME explicitly on top of this.
+    """
     suffix = os.environ.get("HERMES_DATA_DIR_SUFFIX", "")
     if sys.platform == "win32":
         local_appdata = os.environ.get("LOCALAPPDATA", "").strip()
         base = Path(local_appdata) if local_appdata else Path.home() / "AppData" / "Local"
-        return base / ("hermes" + suffix)
-    return Path.home() / (".hermes" + suffix)
+        return base / "GDJ" / ("hermes" + suffix)
+    data_home = os.environ.get("XDG_DATA_HOME", "").strip()
+    base = Path(data_home) if data_home else Path.home() / ".local" / "share"
+    return base / "gdj-hub" / ("hermes" + suffix)
 
 
 def sudo_invoker_default_home() -> Path | None:
@@ -1409,3 +1417,11 @@ def normalize_scope(scope: str | Path | None) -> str | None:
     """
     return hermes_home_key(scope) if scope is not None else None
 
+
+def gdj_agent() -> bool:
+    """GDJ fork: running as GDJ Hub's agent (the app sets GDJ_AGENT=1).
+
+    The agent then never borrows the user's other logins — the GitHub CLI's
+    token (Copilot, GitHub API, git, skills hub), Claude Code / Codex CLI
+    tokens, the Qwen CLI's OAuth file. Keys come only from GDJ's HERMES_HOME."""
+    return os.environ.get("GDJ_AGENT") == "1"

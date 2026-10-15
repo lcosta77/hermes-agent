@@ -107,11 +107,9 @@ def _augment_path_with_known_tools() -> None:
     # Kept in sync with the PATH entries scripts/install.ps1 adds to User scope. The venv Scripts
     # dir hosts hermes.exe + pip console scripts; WinGet\Links is where ``winget install`` drops
     # CLI shims (ripgrep lands there as rg.exe).
+    # GDJ fork: the ``%LOCALAPPDATA%\hermes\{git,hermes-agent\venv}`` entries belong to a
+    # standalone Hermes install and are dropped; GDJ Hub hands the child a sanitized PATH.
     candidate_dirs = [
-        os.path.join(local_appdata, "hermes", "git", "cmd"),
-        os.path.join(local_appdata, "hermes", "git", "bin"),
-        os.path.join(local_appdata, "hermes", "git", "usr", "bin"),
-        os.path.join(local_appdata, "hermes", "hermes-agent", "venv", "Scripts"),
         os.path.join(local_appdata, "Microsoft", "WinGet", "Links")]
     existing = os.environ.get("PATH", "")
     existing_lower = {p.lower() for p in existing.split(os.pathsep) if p}

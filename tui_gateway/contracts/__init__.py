@@ -9,6 +9,7 @@ from . import (  # noqa: F401
     connectors_operation,
     display,
     events,
+    gdj,  # GDJ Hub fork
     groups_bot_relay,
     i18n,
     liveness,
