@@ -77,8 +77,8 @@ def windows_bash_candidates(on_path: str | None, env: Mapping[str, str]) -> list
     roots = [ntpath.join(programfiles, "Git")]
     if env.get("ProgramFiles(x86)"):
         roots.append(ntpath.join(env["ProgramFiles(x86)"], "Git"))
-    # GDJ fork: no ``%LOCALAPPDATA%\hermes\git`` candidate — that portable Git
-    # belongs to a standalone Hermes install, not to GDJ Hub.
+    # gold.vault fork: no ``%LOCALAPPDATA%\hermes\git`` candidate — that portable Git
+    # belongs to a standalone Hermes install, not to gold.vault.
     if env.get("LOCALAPPDATA"):
         roots.append(ntpath.join(env["LOCALAPPDATA"], "Programs", "Git"))
     for root in roots:

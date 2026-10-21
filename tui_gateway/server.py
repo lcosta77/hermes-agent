@@ -1808,7 +1808,7 @@ def _append_model_switch_marker(session: dict | None, *, model: str, provider: s
                 # live agent writes to, or a model switch between turns on a rotated session files the notice
                 # under a parent the conversation no longer reads from (#123545).
                 target = _submit_row_target_key(session)
-                # GDJ fork: a chat opened only to switch its model has no row yet (rows are born on the first
+                # gold.vault fork: a chat opened only to switch its model has no row yet (rows are born on the first
                 # prompt.submit, so abandoned drafts never list) — the append failed its FK and logged a
                 # traceback. The in-memory marker above still reaches the model on that chat's first turn.
                 if db.get_session(target) is None:
@@ -3622,7 +3622,7 @@ from . import (  # noqa: E402
     methods_display as _methods_display, methods_display_watch as _methods_display_watch,
     methods_onboarding as _methods_onboarding, methods_i18n as _methods_i18n,
     methods_shared_metrics as _methods_shared_metrics,
-    methods_gdj as _methods_gdj)  # GDJ Hub fork: settings RPCs
+    methods_gold as _methods_gold)  # gold.vault fork: settings RPCs
 
 for _m in (
     _session_transports, _session_reaper, _session_lifecycle, _session_workdir, _compute_host_bridge, _model_switch,
@@ -3634,6 +3634,6 @@ for _m in (
     _methods_bot_relay, _prompt_turn, _billing_view, _methods_projects, _methods_session_foreign,
     _methods_session_control, _methods_subagents, _methods_vault, _methods_free_tier, _methods_connectors,
     _methods_connectors_account, _methods_display, _methods_display_watch, _methods_onboarding,
-    _methods_i18n, _methods_shared_metrics, _methods_gdj):
+    _methods_i18n, _methods_shared_metrics, _methods_gold):
     _m.register(sys.modules[__name__])
 del _m

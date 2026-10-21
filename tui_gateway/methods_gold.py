@@ -1,13 +1,13 @@
-"""GDJ Hub fork — RPCs the GDJ Agent's settings screen needs that upstream only
+"""gold.vault fork — RPCs the gold.agent's settings screen needs that upstream only
 serves through the dashboard's REST routes (``hermes_cli/web_routers/oauth.py``):
 the provider catalog with each provider's sign-in flow and state, device-code
 OAuth (start / poll / cancel / disconnect) and toolset switches — plus the
 sidebar's archived list and a delete that closes the live copy first. Contracts live
-in ``contracts/gdj.py``; both are registered in ``server.py``.
+in ``contracts/gold.py``; both are registered in ``server.py``.
 
 Two flows stay off on purpose: Anthropic subscription OAuth (Anthropic's OAuth
 policy — the dashboard leaves it out for the same reason; API keys only) and
-Qwen OAuth (reads and rewrites ``~/.qwen``, outside GDJ's HERMES_HOME)."""
+Qwen OAuth (reads and rewrites ``~/.qwen``, outside gold.vault's HERMES_HOME)."""
 
 from __future__ import annotations
 
@@ -16,17 +16,17 @@ from .method_ctx import HandlerRegistry, bind_module
 _registry = HandlerRegistry()
 method = _registry.method
 
-_GDJ_NO_LOGIN = frozenset({"anthropic", "qwen-oauth"})
+_GOLD_NO_LOGIN = frozenset({"anthropic", "qwen-oauth"})
 
 
-def _gdj_oauth_rows() -> dict:
+def _gold_oauth_rows() -> dict:
     """provider id -> (flow, status card) from the dashboard's own catalog."""
     from hermes_cli.web_routers import oauth as oauth_router
 
     rows = {}
     for entry in oauth_router._build_oauth_catalog():
         pid = entry["id"]
-        if pid in _GDJ_NO_LOGIN:
+        if pid in _GOLD_NO_LOGIN:
             rows[pid] = ("external", {"logged_in": False})
             continue
         status = oauth_router._resolve_provider_status(pid, entry.get("status_fn"))
@@ -34,12 +34,12 @@ def _gdj_oauth_rows() -> dict:
     return rows
 
 
-@method("gdj.providers.catalog")
+@method("gold.providers.catalog")
 def _(rid, params: dict) -> dict:
     from hermes_cli.provider_catalog import provider_catalog
 
     try:
-        oauth = _gdj_oauth_rows()
+        oauth = _gold_oauth_rows()
     except Exception:
         oauth = {}
     out = []
@@ -55,13 +55,13 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, {"providers": out})
 
 
-@method("gdj.providers.oauth_start")
+@method("gold.providers.oauth_start")
 def _(rid, params: dict) -> dict:
     import asyncio
 
     provider = str(params.get("provider") or "")
-    if provider in _GDJ_NO_LOGIN:
-        return _err(rid, 4080, f"{provider}: login por assinatura não é oferecido no GDJ Hub")
+    if provider in _GOLD_NO_LOGIN:
+        return _err(rid, 4080, f"{provider}: login por assinatura não é oferecido no gold.vault")
     from hermes_cli.web_routers import oauth as oauth_router
 
     oauth_router._gc_oauth_sessions()
@@ -75,7 +75,7 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, dict(body))
 
 
-@method("gdj.providers.oauth_poll")
+@method("gold.providers.oauth_poll")
 def _(rid, params: dict) -> dict:
     from hermes_cli.web_routers import oauth as oauth_router
 
@@ -91,7 +91,7 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, {k: sess.get(k) for k in keep})
 
 
-@method("gdj.providers.oauth_cancel")
+@method("gold.providers.oauth_cancel")
 def _(rid, params: dict) -> dict:
     from hermes_cli.web_routers import oauth as oauth_router
 
@@ -104,7 +104,7 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, {"ok": sess is not None})
 
 
-@method("gdj.providers.oauth_disconnect")
+@method("gold.providers.oauth_disconnect")
 def _(rid, params: dict) -> dict:
     provider = str(params.get("provider") or "")
     try:
@@ -120,7 +120,7 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, {"ok": bool(cleared)})
 
 
-@method("gdj.toolsets.set")
+@method("gold.toolsets.set")
 def _(rid, params: dict) -> dict:
     # server.py's raw round-trip writer (never the CLI's set_config_value: it
     # prints to stdout — the RPC channel — and may sys.exit).
@@ -140,7 +140,7 @@ def _(rid, params: dict) -> dict:
     return _ok(rid, {"disabled": disabled})
 
 
-@method("gdj.sessions.archived")
+@method("gold.sessions.archived")
 def _(rid, params: dict) -> dict:
     """Archived conversations, newest first — ``session.list`` leaves them out (the
     dashboard's ``?archived=only``)."""
@@ -155,7 +155,7 @@ def _(rid, params: dict) -> dict:
             return _err(rid, 5006, str(e))
 
 
-@method("gdj.sessions.delete")
+@method("gold.sessions.delete")
 def _(rid, params: dict) -> dict:
     """``session.delete`` refuses a conversation still loaded in this gateway, and the
     sidebar keeps every conversation it opened loaded. Close the idle live copies of
@@ -176,12 +176,12 @@ def _(rid, params: dict) -> dict:
     return _methods["session.delete"](rid, {**params, "session_id": target})
 
 
-def _gdj_refuse_borrowed_logins() -> None:
-    """GDJ fork: the agent never borrows the user's GitHub CLI login for
+def _gold_refuse_borrowed_logins() -> None:
+    """gold.vault fork: the agent never borrows the user's GitHub CLI login for
     Copilot (``gh auth token``). The app already points GH_CONFIG_DIR at an
     empty dir; this also suppresses the source and drops a row an earlier
     build seeded — under Hermes' own auth-store lock, so a concurrent writer
-    can't lose it. A Copilot key saved on purpose (``env:*`` from GDJ's
+    can't lose it. A Copilot key saved on purpose (``env:*`` from gold.vault's
     ``.env``) is untouched."""
     try:
         from hermes_cli import auth as auth_mod
@@ -213,5 +213,5 @@ def _gdj_refuse_borrowed_logins() -> None:
 
 
 def register(server) -> None:
-    _gdj_refuse_borrowed_logins()
+    _gold_refuse_borrowed_logins()
     bind_module(globals(), server, skip=("_",))

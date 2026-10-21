@@ -27,17 +27,17 @@ def _real_platform_state_root() -> Optional[Path]:
     """The REAL platform-default Hermes root. Avoids ``Path.home()`` /
     ``hermes_constants`` (tests monkeypatch Path.home to a tempdir); ``expanduser``
     reads HOME/passwd, which the conftest never rewrites."""
-    # GDJ fork: mirrors hermes_constants._get_platform_default_hermes_home
-    # (GDJ Hub's data dir, never a standalone Hermes install).
+    # gold.vault fork: mirrors hermes_constants._get_platform_default_hermes_home
+    # (gold.vault's data dir, never a standalone Hermes install).
     try:
         home = Path(os.path.expanduser("~"))
         if sys.platform == "win32":
             base = os.environ.get("LOCALAPPDATA", "").strip()
             local = Path(base) if base else home / "AppData" / "Local"
-            root = local / "GDJ" / "hermes"
+            root = local / "gold.vault" / "hermes"
         else:
             data_home = os.environ.get("XDG_DATA_HOME", "").strip()
-            root = (Path(data_home) if data_home else home / ".local" / "share") / "gdj-hub" / "hermes"
+            root = (Path(data_home) if data_home else home / ".local" / "share") / "gold.vault" / "hermes"
         return root.resolve()
     except Exception:
         return None

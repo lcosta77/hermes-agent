@@ -113,9 +113,9 @@ class GitHubAuth:
         return get_secret("GITHUB_TOKEN") or get_secret("GH_TOKEN")
 
     def _try_gh_cli(self) -> Optional[str]:
-        from hermes_constants import gdj_agent
+        from hermes_constants import gold_agent
 
-        if gdj_agent():  # GDJ fork: never borrow the user's gh login
+        if gold_agent():  # gold.vault fork: never borrow the user's gh login
             return None
         try:
             result = subprocess.run(

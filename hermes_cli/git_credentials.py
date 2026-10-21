@@ -60,9 +60,9 @@ def _env_github_token() -> Optional[str]:
 
 
 def _gh_cli_token() -> Optional[str]:
-    from hermes_constants import gdj_agent
+    from hermes_constants import gold_agent
 
-    if gdj_agent():  # GDJ fork: never borrow the user's gh login
+    if gold_agent():  # gold.vault fork: never borrow the user's gh login
         return None
     gh = shutil.which("gh")
     if not gh:
